@@ -41,7 +41,7 @@ public class MasPlatformConnectionAliveKeeperJob implements Job {
         return TriggerBuilder.newTrigger()
                 .forJob(MasPlatformConnectionAliveKeeperJob.getJobDetail())
                 .withIdentity("connectionKeepAlive")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/1 0/1 ? * * *"))
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0/1 ? * * *"))
                 .build();
     }
 

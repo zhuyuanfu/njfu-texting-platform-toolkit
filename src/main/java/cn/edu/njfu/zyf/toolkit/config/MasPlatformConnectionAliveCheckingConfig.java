@@ -71,15 +71,15 @@ public class MasPlatformConnectionAliveCheckingConfig  {
         logger.info("** MasPlatformConnectionAliveCheckingConfig has been initiated. **");
     }
     
-    public String writeJSESSIONIDToDisk(String jsessionid) {
+    public String writeJSESSIONIDToDisk(String newJSESSIONID) {
         File file = new File(this.jSessionIdDiskStoragePath);
         OutputStream os =null;
         OutputStreamWriter osr = null;
         try {
             os = new FileOutputStream(file);
             osr = new OutputStreamWriter(os);
-            osr.write("admin=" + jsessionid);
-            this.JSESSIONID = jsessionid;
+            osr.write("admin=" + newJSESSIONID);
+            this.JSESSIONID = newJSESSIONID;
         } catch (IOException e) {
             logger.error("write jsession error, {}", e);
             return "writing jsessionid to disk failed. go see log file for urself.";

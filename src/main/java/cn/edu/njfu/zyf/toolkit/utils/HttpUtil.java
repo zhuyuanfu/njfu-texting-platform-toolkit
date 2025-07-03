@@ -7,10 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,14 +22,7 @@ public class HttpUtil {
     
     private static Logger logger = LoggerFactory.getLogger(HttpUtil.class);
     
-    public static String post(
-            String requestUrl,
-            Map<String, String> header,
-            Map<String, String> formData
-            ) throws IOException {
-        
-        //logger.debug("header: {}", mapToPrettyString(header));
-        //logger.debug("formData: {}", mapToPrettyString(formData));
+    public static String post(String requestUrl, Map<String, String> header, Map<String, String> formData) throws IOException {
 
         URL url = new URL(requestUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -48,8 +39,8 @@ public class HttpUtil {
         StringBuilder formDataBuilder = new StringBuilder();
         while(formDataIterator.hasNext()) {
             Entry<String, String> entry = formDataIterator.next();
-            String key = URLEncoder.encode(entry.getKey(), Charset.forName("UTF-8"));
-            String value = URLEncoder.encode(entry.getValue(), Charset.forName("UTF-8"));
+            String key = URLEncoder.encode(entry.getKey(), "UTF-8");
+            String value = URLEncoder.encode(entry.getValue(), "UTF-8");
             formDataBuilder.append(key).append('=').append(value).append('&');
         }
         String formDataPayload = formDataBuilder.toString();

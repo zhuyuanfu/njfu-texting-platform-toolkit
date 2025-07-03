@@ -27,11 +27,11 @@ public class MasPlatformKeepingAliveController {
     
     @ApiOperation(value = "设置访问mas平台使用的JSESSIONID")
     @RequestMapping(value = "/jsessionid", method = RequestMethod.PUT)
-    public String setJSESSIONID(String jsessionid) throws IOException {
-        if (jsessionid == null || jsessionid.equals("")) {
-            return "An empty JSESSIONID is not allowed to be recorded.";
+    public String setJSESSIONID(String newJSESSIONID) throws IOException {
+        if (newJSESSIONID == null || newJSESSIONID.equals("")) {
+            return "An empty JSESSIONID is not allowed.";
         }
-        return service.setJSESSIONID(jsessionid);
+        return service.setJSESSIONID(newJSESSIONID);
     }
     
     @ApiOperation(value = "查看该JSESSIONID对mas平台来说是否仍然活着")

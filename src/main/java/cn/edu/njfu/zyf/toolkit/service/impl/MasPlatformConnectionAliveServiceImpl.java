@@ -30,8 +30,8 @@ public class MasPlatformConnectionAliveServiceImpl implements MasPlatformConnect
     }
 
     @Override
-    public String setJSESSIONID(String jsessionid) {
-        return config.writeJSESSIONIDToDisk(jsessionid);
+    public String setJSESSIONID(String newJSESSIONID) {
+        return config.writeJSESSIONIDToDisk(newJSESSIONID);
     }
 
     @Override
