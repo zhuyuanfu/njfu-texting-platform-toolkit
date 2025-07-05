@@ -16,7 +16,7 @@ import cn.edu.njfu.zyf.toolkit.quartz.job.MasPlatformConnectionAliveKeeperJob;
 
 
 @Component
-public class QuartzSchedulerStarter implements ApplicationListener<ApplicationReadyEvent> {
+public class MasPlatformConnectionAliveKeeperScheduler implements ApplicationListener<ApplicationReadyEvent> {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -28,9 +28,10 @@ public class QuartzSchedulerStarter implements ApplicationListener<ApplicationRe
             Scheduler scheduler = new StdSchedulerFactory().getScheduler();
             scheduler.scheduleJob(jobDetail, trigger);
             scheduler.start();        
-            logger.info("Quartz scheduler has been started.");
+            logger.info("MasPlatformConnectionAliveKeeperStarter has started keep-conn-alive jobs.");
 
         } catch(SchedulerException e) {
+            logger.error("** Failed to schedule keep-conn-alive jobs. **");
             logger.error("{}", e);
         }
     }

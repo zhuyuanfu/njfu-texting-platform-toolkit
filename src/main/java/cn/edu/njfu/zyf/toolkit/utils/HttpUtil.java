@@ -72,6 +72,43 @@ public class HttpUtil {
         return responseText;
     }
     
+    public static String post(String requestUrl, Map<String, String> header, String payload) throws IOException {
+
+        URL url = new URL(requestUrl);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setDoOutput(true);
+        
+        Iterator<Entry<String, String>> headerIterator = header.entrySet().iterator();
+        while(headerIterator.hasNext()) {
+            Entry<String, String> entry = headerIterator.next();
+            con.setRequestProperty(entry.getKey(), entry.getValue());
+        }
+        
+        OutputStream os = con.getOutputStream();
+        OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+        osw.write(payload);
+        osw.close();
+        os.close();
+        
+        con.connect();
+        
+        InputStream is = con.getInputStream();
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isr);
+        StringBuilder responseBuilder = new StringBuilder();
+        String responseLine = null;
+        while((responseLine = br.readLine()) != null) {
+            responseBuilder.append(responseLine).append("\n");
+        }
+        br.close();
+        isr.close();
+        is.close();
+        
+        String responseText = responseBuilder.toString();
+        return responseText;
+    }
+    
     public static String mapToPrettyString(Map map) {
         StringBuilder sb = new StringBuilder();
         sb.append('{').append('\n');

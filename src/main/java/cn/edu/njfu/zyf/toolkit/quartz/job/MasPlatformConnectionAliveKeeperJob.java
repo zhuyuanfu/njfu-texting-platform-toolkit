@@ -23,7 +23,7 @@ public class MasPlatformConnectionAliveKeeperJob implements Job {
         MasPlatformConnectionAliveService service = ApplicationContextUtil.getBean(MasPlatformConnectionAliveService.class);
         boolean connectionAlive = service.keepConnectionAlive();
         if (connectionAlive) {
-            logger.info("Connection to MAS platform alive. Good news.");
+            logger.info("Kept connection to MAS platform alive. Good news.");
 
         } else {
             logger.error("Connection to MAS platform dead. Set a new JSESSIONID ASAP.");

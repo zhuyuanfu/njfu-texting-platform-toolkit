@@ -31,5 +31,8 @@ hs_err_pid*
 # eclipse settings directory
 .settings/
 
+# bin directory
+bin/
+
 # build outputs
 target/

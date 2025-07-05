@@ -36,5 +36,12 @@ public class ToolkitController {
         
         return textMessageSendingService.resolveFileAndSendHttpRequest(jSessionId, messageExcelFile);
     }
+    
+    @ApiOperation(value = "立即发送一条短信")
+    @RequestMapping(value = "/sendImmediately", method = RequestMethod.POST)
+    public boolean findUntestedDorm(String mobile, String message) throws IOException {
+        return textMessageSendingService.sendImmediately(mobile, message);
+    }
+    
 
 }

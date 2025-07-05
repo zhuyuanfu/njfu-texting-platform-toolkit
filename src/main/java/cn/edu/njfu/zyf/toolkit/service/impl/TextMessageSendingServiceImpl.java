@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -93,16 +94,19 @@ public class TextMessageSendingServiceImpl implements TextMessageSendingService 
         StringBuilder resultBuilder = new StringBuilder();
         int successCount = 0;
         for(TextMessageDelivery delivery: deliveryList) {
-            String result = sendMessage(
+            boolean success = sendMessage(
                     jSessionId,
                     delivery.getSendMode(),
                     delivery.getMobile(),
                     delivery.getName(),
                     delivery.getMessage(),
-                    delivery.getStringSendDateTime()
-                    );
-            if (result.startsWith("Succe")) {
+                    delivery.getStringSendDateTime());
+            String result = null;
+            if (success) {
                 successCount++;
+                result = "Succeeded setting delivery to " + delivery.getName() + delivery.getMobile() + ", sendTime: " + delivery.getStringSendDateTime() + ", content: " + delivery.getMessage();
+            } else {
+                result = "Failed setting delivery to " + delivery.getName() + delivery.getMobile() + ", sendTime: " + delivery.getStringSendDateTime() + ", content: " + delivery.getMessage();
             }
             resultBuilder.append(result).append("\n");
         }
@@ -110,7 +114,7 @@ public class TextMessageSendingServiceImpl implements TextMessageSendingService 
     }
 
 
-    private static String sendMessage(String jSessionId, int sendMode, String destAddrHand, String subject, String content, String sendTime) {
+    private boolean sendMessage(String jSessionId, int sendMode, String destAddrHand, String subject, String content, String sendTime) {
         String url = "http://121.248.150.95:6789/sms/sendSms.do?act=insertSendSM";
         Map<String, String> header = new HashMap<>();
         Map<String, String> formData = new HashMap<>();
@@ -132,13 +136,38 @@ public class TextMessageSendingServiceImpl implements TextMessageSendingService 
             logger.error("Error: {}", e);
         }
         String result = null;
+        boolean success = false;
         if (responseText != null && responseText.contains("已成功提交")) {
             result = "Succeeded setting delivery to " + subject + destAddrHand + ", sendTime: " + sendTime + ", content: " + content;
             logger.info(result);
+            success = true;
         } else {
             result = "Failed setting delivery to " + subject + destAddrHand + ", sendTime: " + sendTime + ", content: " + content;
             logger.error(result);
         }
-        return result;
+        return success;
     }
+
+
+	@Override
+	public boolean sendTextMessage(TextMessageDelivery delivery) {
+		return sendMessage(masConfig.getJSESSIONID(), 
+				delivery.getSendMode(),
+				delivery.getMobile(),
+				delivery.getName(),
+				delivery.getMessage(),
+				delivery.getStringSendDateTime());
+	}
+
+
+	@Override
+	public boolean sendImmediately(String mobile, String content) {
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		return sendMessage(masConfig.getJSESSIONID(), 
+				0,
+				mobile,
+				"一条立即发送的短信",
+				content,
+				LocalDateTime.now().format(dtf));
+	}
 }
