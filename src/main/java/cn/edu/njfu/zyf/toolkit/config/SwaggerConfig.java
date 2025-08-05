@@ -27,7 +27,7 @@ public class SwaggerConfig {
  
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("朱元甫的妙妙小工具")
+                .title("朱元甫的移动短信平台妙妙小工具")
                 .description("swagger的API文档")
                 .version("1.0").build();
     }

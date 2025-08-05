@@ -11,18 +11,20 @@ import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.edu.njfu.zyf.toolkit.service.TeachingStaffService;
+import cn.edu.njfu.zyf.toolkit.service.TeachingStaffBirthdayService;
 import cn.edu.njfu.zyf.toolkit.utils.ApplicationContextUtil;
 
 public class TeachingStaffBirthdayCongratDailySendingJob implements Job {
+	
+	private static final String IDENTITY = "TeachingStaffBirthdayCongratDailySending";
 
-    Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		logger.info("Will send daily birthday congratulation message to all related teaching staff.");
 
-		TeachingStaffService service = ApplicationContextUtil.getBean(TeachingStaffService.class);
+		//TeachingStaffBirthdayService service = ApplicationContextUtil.getBean(TeachingStaffBirthdayService.class);
 		String result = null;
 		//result = service.sendTextMessageToBirthdayTeachingStaff();
 		
@@ -31,14 +33,14 @@ public class TeachingStaffBirthdayCongratDailySendingJob implements Job {
 
     public static JobDetail getJobDetail() {
         return JobBuilder.newJob(TeachingStaffBirthdayCongratDailySendingJob.class)
-                .withIdentity("TeachingStaffBirthdayCongratDailySending")
+                .withIdentity(IDENTITY)
                 .build();
     }
     
     public static Trigger getTrigger() {
         return TriggerBuilder.newTrigger()
                 .forJob(TeachingStaffBirthdayCongratDailySendingJob.getJobDetail())
-                .withIdentity("TeachingStaffBirthdayCongratDailySending")
+                .withIdentity(IDENTITY)
                 .withSchedule(CronScheduleBuilder.cronSchedule("0 0 8 ? * * *"))
                 .build();
     }

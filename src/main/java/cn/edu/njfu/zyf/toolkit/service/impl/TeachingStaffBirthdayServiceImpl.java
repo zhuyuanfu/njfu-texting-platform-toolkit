@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 import cn.edu.njfu.zyf.toolkit.dao.TeachingStaffDao;
 import cn.edu.njfu.zyf.toolkit.model.TeachingStaff;
 import cn.edu.njfu.zyf.toolkit.model.TextMessageDelivery;
-import cn.edu.njfu.zyf.toolkit.service.TeachingStaffService;
+import cn.edu.njfu.zyf.toolkit.service.TeachingStaffBirthdayService;
 import cn.edu.njfu.zyf.toolkit.service.TextMessageSendingService;
 
 @Service
-public class TeachingStaffServiceImpl implements TeachingStaffService {
+public class TeachingStaffBirthdayServiceImpl implements TeachingStaffBirthdayService {
 
 	@Autowired
 	private TeachingStaffDao dao;

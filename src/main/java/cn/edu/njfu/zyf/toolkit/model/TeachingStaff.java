@@ -15,7 +15,6 @@ public class TeachingStaff {
 	private LocalDate birthday;
 	private String identityNumber;
 	private String mobilePhoneNumber;
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	
 	public String getUnchangeableCode() {
 		return unchangeableCode;
@@ -33,6 +32,7 @@ public class TeachingStaff {
 		return birthday;
 	}
 	public String getBirthdayString() {
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		return birthday.format(dtf);
 	}
 	public void setBirthday(LocalDate birthday) {

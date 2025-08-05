@@ -18,7 +18,7 @@ import cn.edu.njfu.zyf.toolkit.quartz.job.TeachingStaffBirthdayCongratDailySendi
 @Component
 public class TeachingStaffBirthdayCongratDailySendingScheduler implements ApplicationListener<ApplicationReadyEvent> {
 
-    Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {

@@ -145,21 +145,26 @@ public class MasPlatformConnectionAliveCheckingConfig  {
         }
     }
     
-    private Boolean checkConnectionAlive() {
-        String url = "http://121.248.150.95:6789/index.do";
+    public Boolean checkConnectionAlive() {
+        String url = "http://121.248.150.95:6789/sms/sendSms.do?act=getNoticeMap";
         Map<String, String> header = new HashMap<>();
         header.put("Cookie", "JSESSIONID=" + this.JSESSIONID);
+        header.put("connection", "keep-alive");
+        header.put("content-length", "0");
         boolean alive = false;
         try {
-            String response = HttpUtil.get(url, header);
-            if(response.contains("条新上行短信，请")) {
+            String response = HttpUtil.post(url, header, "");
+            if(!response.contains("登录超时")) {
                 alive = true;
                 this.lastConnectionAliveTime = LocalDateTime.now();
+                logger.info("Checking if JSESSIONID is alive using {}. Response: {}", url, response.trim());
+
             } else {
-                logger.info("Connection dead. Please use a new JSESSIONID.");
+                logger.warn("Checking if JSESSIONID is alive using {}. Response says:  \n登录超时\n", url);
+                logger.warn("Connection dead. Set a new JSESSIONID.");
             }
         } catch (IOException e) {
-            logger.error("Connection dead. Please use a new JSESSIONID. {}", e);
+            logger.error("Connection dead. Set a new JSESSIONID. {}", e);
         }
         this.isConnectionAlive = alive;
         return alive;

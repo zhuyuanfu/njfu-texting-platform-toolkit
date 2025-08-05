@@ -1,10 +1,6 @@
 package cn.edu.njfu.zyf.toolkit.service.impl;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import cn.edu.njfu.zyf.toolkit.config.MasPlatformConnectionAliveCheckingConfig;
 import cn.edu.njfu.zyf.toolkit.service.MasPlatformConnectionAliveService;
-import cn.edu.njfu.zyf.toolkit.utils.HttpUtil;
 
 @Service
 public class MasPlatformConnectionAliveServiceImpl implements MasPlatformConnectionAliveService{
@@ -36,7 +31,7 @@ public class MasPlatformConnectionAliveServiceImpl implements MasPlatformConnect
 
     @Override
     public boolean isConnectionAlive() {
-        return visitMASIndexPageToCheckIfConnectionIsAlive();
+        return config.checkConnectionAlive();
     }
 
     @Override
@@ -46,27 +41,7 @@ public class MasPlatformConnectionAliveServiceImpl implements MasPlatformConnect
     }
 
     @Override
-    public boolean keepConnectionAlive() {
-        return visitMASIndexPageToCheckIfConnectionIsAlive();
-    }
-
-    private boolean visitMASIndexPageToCheckIfConnectionIsAlive() {
-        String url = "http://121.248.150.95:6789/index.do";
-        Map<String, String> header = new HashMap<>();
-        header.put("Cookie", "JSESSIONID=" + config.getJSESSIONID());
-        boolean alive = false;
-        try {
-            String response = HttpUtil.get(url, header);
-            if(response.contains("条新上行短信，请")) {
-                alive = true;
-                config.setLastConnectionAliveTime(LocalDateTime.now());
-            } else {
-                logger.info("Connection dead. Please use a new JSESSIONID.");
-            }
-        } catch (IOException e) {
-            logger.error("Connection dead. Please use a new JSESSIONID. {}", e);
-        }
-        config.setConnectionAlive(alive);
-        return alive;
+    public boolean checkOrKeepConnectionAlive() {
+        return config.checkConnectionAlive();
     }
 }

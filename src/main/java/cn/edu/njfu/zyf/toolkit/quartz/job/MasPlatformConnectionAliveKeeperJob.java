@@ -16,12 +16,14 @@ import cn.edu.njfu.zyf.toolkit.utils.ApplicationContextUtil;
 
 public class MasPlatformConnectionAliveKeeperJob implements Job {
 
-    Logger logger = LoggerFactory.getLogger(this.getClass());
+	private static final String IDENTITY = "connectionKeepAlive";
+	
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     
     @Override
     public void execute(JobExecutionContext jec) throws JobExecutionException {
         MasPlatformConnectionAliveService service = ApplicationContextUtil.getBean(MasPlatformConnectionAliveService.class);
-        boolean connectionAlive = service.keepConnectionAlive();
+        boolean connectionAlive = service.checkOrKeepConnectionAlive();
         if (connectionAlive) {
             logger.info("Kept connection to MAS platform alive. Good news.");
 
@@ -33,15 +35,24 @@ public class MasPlatformConnectionAliveKeeperJob implements Job {
 
     public static JobDetail getJobDetail() {
         return JobBuilder.newJob(MasPlatformConnectionAliveKeeperJob.class)
-                .withIdentity("connectionKeepAlive")
+                .withIdentity(IDENTITY)
                 .build();
     }
     
+    /**
+     * 测试结果：
+     * 每30分钟访问一次，MAS平台的session会过期；
+     * 每20分钟访问一次，MAS平台的session会过期；
+     * 每15分钟访问一次，MAS平台的session不会过期。
+     * 看起来过期时间在15~20min之间。
+     * 设置每15分钟访问一次。
+     * @return a cron trigger
+     */
     public static Trigger getTrigger() {
         return TriggerBuilder.newTrigger()
                 .forJob(MasPlatformConnectionAliveKeeperJob.getJobDetail())
-                .withIdentity("connectionKeepAlive")
-                .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0/1 ? * * *"))
+                .withIdentity(IDENTITY)
+                .withSchedule(CronScheduleBuilder.cronSchedule("0 0/15 0/1 ? * * *"))
                 .build();
     }
 

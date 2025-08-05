@@ -5,5 +5,5 @@ public interface MasPlatformConnectionAliveService {
     String setJSESSIONID(String jsessionid);
     boolean isConnectionAlive();
     String getLastConnectionAliveTime();
-    boolean keepConnectionAlive();
+    boolean checkOrKeepConnectionAlive();
 }

@@ -18,7 +18,7 @@ import cn.edu.njfu.zyf.toolkit.quartz.job.MasPlatformConnectionAliveKeeperJob;
 @Component
 public class MasPlatformConnectionAliveKeeperScheduler implements ApplicationListener<ApplicationReadyEvent> {
 
-    Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {

@@ -64,7 +64,7 @@ public class TextMessageSendingServiceImpl implements TextMessageSendingService 
                 String content = row.getCell(3).getStringCellValue();
                 if(name != null && (!name.equals(""))) {
                     TextMessageDelivery tmd = new TextMessageDelivery(name, mobile, sendDateTime, content, 20);
-                    logger.info("{}", tmd);
+                    //logger.info("{}", tmd);
                     deliveryList.add(tmd);
                 }
             }

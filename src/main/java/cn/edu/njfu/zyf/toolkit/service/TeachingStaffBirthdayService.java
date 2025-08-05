@@ -4,7 +4,7 @@ import java.util.List;
 
 import cn.edu.njfu.zyf.toolkit.model.TeachingStaff;
 
-public interface TeachingStaffService {
+public interface TeachingStaffBirthdayService {
 	List<TeachingStaff> listTodaysTeachingStaff();
 	String sendTextMessageToBirthdayTeachingStaff();
 }

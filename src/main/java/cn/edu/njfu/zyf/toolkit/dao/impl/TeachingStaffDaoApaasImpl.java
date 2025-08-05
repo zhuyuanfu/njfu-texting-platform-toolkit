@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,6 +23,8 @@ import cn.edu.njfu.zyf.toolkit.utils.HttpUtil;
 
 @Repository
 public class TeachingStaffDaoApaasImpl implements TeachingStaffDao{
+	
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private static Map<String, String> fieldCodeToFieldNameMap = new HashMap<>();
 	
@@ -53,23 +57,21 @@ public class TeachingStaffDaoApaasImpl implements TeachingStaffDao{
 	    		TeachingStaff ts = new TeachingStaff();
 	    		ts.setUnchangeableCode(datum.get("unchangeableCode"));
 	    		ts.setName(datum.get("name"));
-	    		ts.setIdentityNumber(datum.get("identityNumber"));
 	    		ts.setMobilePhoneNumber(datum.get("mobilePhoneNumber"));
-	    		String birthdayText = datum.get("birthday");
-	    		if (!CommonUtil.isStringEmpty(birthdayText)) {
-	    			birthdayText = birthdayText.split("T")[0];
-	    			String[] ymdArray = birthdayText.split("-");
-	    			LocalDate birthDate = LocalDate.of(
-	    					Integer.valueOf(ymdArray[0]), 
-	    					Integer.valueOf(ymdArray[1]),
-	    					Integer.valueOf(ymdArray[2]));
+	    		String identityNumber = datum.get("identityNumber");
+	    		
+	    		if (!CommonUtil.isStringEmpty(identityNumber) && identityNumber.trim().length() == 18) {
+	    			int birthyear = Integer.parseInt(identityNumber.substring(6, 10));
+		    		int birthMonth = Integer.parseInt(identityNumber.substring(10, 12));
+		    		int birthDateOfMonth = Integer.parseInt(identityNumber.substring(12, 14));
+	    			LocalDate birthDate = LocalDate.of(birthyear, birthMonth, birthDateOfMonth);
+		    		ts.setIdentityNumber(identityNumber);
 	    			ts.setBirthday(birthDate);
 	    		}
 	    		result.add(ts);
 	    	}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("{}", e);
 		}
 		return result;
 	}
