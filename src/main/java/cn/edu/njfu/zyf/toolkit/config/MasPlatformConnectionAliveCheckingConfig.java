@@ -153,7 +153,7 @@ public class MasPlatformConnectionAliveCheckingConfig  {
         header.put("content-length", "0");
         boolean alive = false;
         try {
-            String response = HttpUtil.post(url, header, "");
+            String response = HttpUtil.requestWithStringRequestBody("POST", url, header, "");
             if(!response.contains("登录超时")) {
                 alive = true;
                 this.lastConnectionAliveTime = LocalDateTime.now();

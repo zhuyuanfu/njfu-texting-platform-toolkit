@@ -21,39 +21,43 @@ import org.slf4j.LoggerFactory;
 public class HttpUtil {
     
     private static Logger logger = LoggerFactory.getLogger(HttpUtil.class);
-    
-    public static String post(String requestUrl, Map<String, String> header, Map<String, String> formData) throws IOException {
+
+    public static String requestWithMapFormData(String method, String requestUrl, Map<String, String> header, Map<String, String> formData) throws IOException {
 
         URL url = new URL(requestUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
+        con.setRequestMethod(method);
         con.setDoOutput(true);
         
-        Iterator<Entry<String, String>> headerIterator = header.entrySet().iterator();
-        while(headerIterator.hasNext()) {
-            Entry<String, String> entry = headerIterator.next();
-            con.setRequestProperty(entry.getKey(), entry.getValue());
+        if (header != null) {
+	        Iterator<Entry<String, String>> headerIterator = header.entrySet().iterator();
+	        while(headerIterator.hasNext()) {
+	            Entry<String, String> entry = headerIterator.next();
+	            con.setRequestProperty(entry.getKey(), entry.getValue());
+	        }
         }
         
-        Iterator<Entry<String, String>> formDataIterator = formData.entrySet().iterator();
-        StringBuilder formDataBuilder = new StringBuilder();
-        while(formDataIterator.hasNext()) {
-            Entry<String, String> entry = formDataIterator.next();
-            String key = URLEncoder.encode(entry.getKey(), "UTF-8");
-            String value = URLEncoder.encode(entry.getValue(), "UTF-8");
-            formDataBuilder.append(key).append('=').append(value).append('&');
+        if (formData != null) {
+	        Iterator<Entry<String, String>> formDataIterator = formData.entrySet().iterator();
+	        StringBuilder formDataBuilder = new StringBuilder();
+	        while(formDataIterator.hasNext()) {
+	            Entry<String, String> entry = formDataIterator.next();
+	            String key = URLEncoder.encode(entry.getKey(), "UTF-8");
+	            String value = URLEncoder.encode(entry.getValue(), "UTF-8");
+	            formDataBuilder.append(key).append('=').append(value).append('&');
+	        }
+	        String formDataPayload = formDataBuilder.toString();
+	        if (formDataPayload.endsWith("&")) {
+	            formDataPayload = formDataPayload.substring(0, formDataPayload.length() - 1);
+	        }
+	        
+	        //logger.info("formDataPayload   =  " + formDataPayload);
+	        OutputStream os = con.getOutputStream();
+	        OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+	        osw.write(formDataPayload);
+	        osw.close();
+	        os.close();
         }
-        String formDataPayload = formDataBuilder.toString();
-        if (formDataPayload.endsWith("&")) {
-            formDataPayload = formDataPayload.substring(0, formDataPayload.length() - 1);
-        }
-        //logger.info("formDataPayload   =  " + formDataPayload);
-        OutputStream os = con.getOutputStream();
-        OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
-        osw.write(formDataPayload);
-        osw.close();
-        os.close();
-        
         con.connect();
         
         InputStream is = con.getInputStream();
@@ -71,26 +75,29 @@ public class HttpUtil {
         String responseText = responseBuilder.toString();
         return responseText;
     }
-    
-    public static String post(String requestUrl, Map<String, String> header, String payload) throws IOException {
+
+    public static String requestWithStringRequestBody(String method, String requestUrl, Map<String, String> header, String requestBody) throws IOException {
 
         URL url = new URL(requestUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
+        con.setRequestMethod(method);
         con.setDoOutput(true);
         
-        Iterator<Entry<String, String>> headerIterator = header.entrySet().iterator();
-        while(headerIterator.hasNext()) {
-            Entry<String, String> entry = headerIterator.next();
-            con.setRequestProperty(entry.getKey(), entry.getValue());
+        if (header != null) {
+	        Iterator<Entry<String, String>> headerIterator = header.entrySet().iterator();
+	        while(headerIterator.hasNext()) {
+	            Entry<String, String> entry = headerIterator.next();
+	            con.setRequestProperty(entry.getKey(), entry.getValue());
+	        }
         }
         
-        OutputStream os = con.getOutputStream();
-        OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
-        osw.write(payload);
-        osw.close();
-        os.close();
-        
+        if (!CommonUtil.isStringEmpty(requestBody)) {
+	        OutputStream os = con.getOutputStream();
+	        OutputStreamWriter osw = new OutputStreamWriter(os, "UTF-8");
+	        osw.write(requestBody);
+	        osw.close();
+	        os.close();
+        }
         con.connect();
         
         InputStream is = con.getInputStream();
@@ -108,47 +115,5 @@ public class HttpUtil {
         String responseText = responseBuilder.toString();
         return responseText;
     }
-    
-    public static String mapToPrettyString(Map map) {
-        StringBuilder sb = new StringBuilder();
-        sb.append('{').append('\n');
-        Iterator<Entry> itr = map.entrySet().iterator();
-        while(itr.hasNext()) {
-            Entry e = itr.next();
-            sb.append('\t').append(e.getKey()).append(" -> ").append(e.getValue()).append('\n');
-        }
-        sb.append('}');
-        return sb.toString();
-    }
-    
-    public static String get(String requestUrl, Map<String, String> header) throws IOException {
-        URL url = new URL(requestUrl);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("GET");
-        con.setDoOutput(true);
-        
-        Iterator<Entry<String, String>> headerIterator = header.entrySet().iterator();
-        while(headerIterator.hasNext()) {
-            Entry<String, String> entry = headerIterator.next();
-            con.setRequestProperty(entry.getKey(), entry.getValue());
-        }
-        
-        
-        con.connect();
-        
-        InputStream is = con.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader br = new BufferedReader(isr);
-        StringBuilder responseBuilder = new StringBuilder();
-        String responseLine = null;
-        while((responseLine = br.readLine()) != null) {
-            responseBuilder.append(responseLine).append("\n");
-        }
-        br.close();
-        isr.close();
-        is.close();
-        
-        String responseText = responseBuilder.toString();
-        return responseText;
-    }
+
 }

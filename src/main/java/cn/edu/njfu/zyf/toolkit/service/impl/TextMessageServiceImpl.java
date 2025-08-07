@@ -21,17 +21,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import cn.edu.njfu.zyf.toolkit.config.MasPlatformConnectionAliveCheckingConfig;
+import cn.edu.njfu.zyf.toolkit.dao.MasPlatformScheduledMessageBoxDao;
 import cn.edu.njfu.zyf.toolkit.model.TextMessageDelivery;
-import cn.edu.njfu.zyf.toolkit.service.TextMessageSendingService;
+import cn.edu.njfu.zyf.toolkit.service.TextMessageService;
 import cn.edu.njfu.zyf.toolkit.utils.HttpUtil;
 
 @Service
-public class TextMessageSendingServiceImpl implements TextMessageSendingService {
+public class TextMessageServiceImpl implements TextMessageService {
 
-    private static Logger logger = LoggerFactory.getLogger(TextMessageSendingServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(TextMessageServiceImpl.class);
 
     @Autowired
     private MasPlatformConnectionAliveCheckingConfig masConfig;
+    
+    @Autowired
+    private MasPlatformScheduledMessageBoxDao messageBoxDao;
     
     @Override
     public String resolveFileAndSendHttpRequest(String jSessionId, MultipartFile excelFile) {
@@ -64,27 +68,23 @@ public class TextMessageSendingServiceImpl implements TextMessageSendingService 
                 String content = row.getCell(3).getStringCellValue();
                 if(name != null && (!name.equals(""))) {
                     TextMessageDelivery tmd = new TextMessageDelivery(name, mobile, sendDateTime, content, 20);
-                    //logger.info("{}", tmd);
                     deliveryList.add(tmd);
                 }
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
             if (is != null)
                 try {
                     is.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    logger.error("{}", e);
                 }
             if (workbook != null) {
                 try {
                     workbook.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    logger.error("{}", e);
                 }
             }
         }
@@ -131,7 +131,7 @@ public class TextMessageSendingServiceImpl implements TextMessageSendingService 
         formData.put("sendTime", sendTime);
         String responseText = null;
         try {
-            responseText = HttpUtil.post(url, header, formData);
+            responseText = HttpUtil.requestWithMapFormData("POST", url, header, formData);
         } catch (IOException e) {
             logger.error("Error: {}", e);
         }
@@ -170,4 +170,14 @@ public class TextMessageSendingServiceImpl implements TextMessageSendingService 
 				content,
 				LocalDateTime.now().format(dtf));
 	}
+
+
+	@Override
+	public String delete9999ScheduledMessages() {
+		List<String> messageIdList = messageBoxDao.listScheduledMessageIds(9999);
+		boolean deleteSuccess = messageBoxDao.deleteMessagesById(messageIdList);
+		return "delete success: " + deleteSuccess + ", number of scheduled messages deleted: " + messageIdList.size();
+	}
+	
+	
 }

@@ -12,7 +12,7 @@ import cn.edu.njfu.zyf.toolkit.dao.TeachingStaffDao;
 import cn.edu.njfu.zyf.toolkit.model.TeachingStaff;
 import cn.edu.njfu.zyf.toolkit.model.TextMessageDelivery;
 import cn.edu.njfu.zyf.toolkit.service.TeachingStaffBirthdayService;
-import cn.edu.njfu.zyf.toolkit.service.TextMessageSendingService;
+import cn.edu.njfu.zyf.toolkit.service.TextMessageService;
 
 @Service
 public class TeachingStaffBirthdayServiceImpl implements TeachingStaffBirthdayService {
@@ -21,7 +21,7 @@ public class TeachingStaffBirthdayServiceImpl implements TeachingStaffBirthdaySe
 	private TeachingStaffDao dao;
 	
 	@Autowired
-	private TextMessageSendingService textMessageSendingService;
+	private TextMessageService textMessageSendingService;
 	
 	@Override
 	public List<TeachingStaff> listTodaysTeachingStaff() {

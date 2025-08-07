@@ -46,7 +46,7 @@ public class TeachingStaffDaoApaasImpl implements TeachingStaffDao{
 		String requestBody = "{\"query\":\"{\\\"query\\\":{\\\"bool\\\":{\\\"must\\\":[{\\\"range\\\":{\\\"createTime\\\":{\\\"gte\\\":\\\"1970-01-01 00:00:00\\\",\\\"lte\\\":\\\"2099-07-26 11:12:20\\\",\\\"format\\\":\\\"yyyy-MM-dd HH:mm:ss\\\",\\\"time_zone\\\":\\\"Asia/Shanghai\\\"}}}],\\\"must_not\\\":[]}},\\\"_source\\\":[\\\"input_1682304045325\\\",\\\"input_1682304051031\\\",\\\"date_1682304091304\\\",\\\"input_1682315112334\\\",\\\"input_1682315140569\\\"],\\\"from\\\":0,\\\"size\\\":50000,\\\"sort\\\":[{\\\"createTime\\\":{\\\"order\\\":\\\"desc\\\"}}]}\",\"password\":null,\"appId\":\"65\",\"formId\":\"447\",\"formCode\":\"8463e34a8b874c6397c55d48ff4c90be\",\"filterFields\":[\"createTime\"],\"queryFields\":[\"input_1682304045325\",\"input_1682304051031\",\"date_1682304091304\",\"input_1682315112334\",\"input_1682315140569\"]}";
 		List<TeachingStaff> result = new ArrayList<>();
 		try {
-			String responseText = HttpUtil.post(url, requestHeader, requestBody);
+			String responseText = HttpUtil.requestWithStringRequestBody("POST", url, requestHeader, requestBody);
 			String parsedResponseText = convertFieldCode2FieldName(responseText);
 			ObjectMapper om = new ObjectMapper();
 	    	Map<String, Object> responseMap = om.readValue(parsedResponseText, new TypeReference<Map<String, Object>>(){});
