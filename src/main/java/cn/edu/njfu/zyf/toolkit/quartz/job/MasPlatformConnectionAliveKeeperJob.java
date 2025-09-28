@@ -11,6 +11,7 @@ import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.edu.njfu.zyf.toolkit.config.MasPlatformConnectionAliveCheckingConfig;
 import cn.edu.njfu.zyf.toolkit.service.MasPlatformConnectionAliveService;
 import cn.edu.njfu.zyf.toolkit.utils.ApplicationContextUtil;
 
@@ -23,14 +24,8 @@ public class MasPlatformConnectionAliveKeeperJob implements Job {
     @Override
     public void execute(JobExecutionContext jec) throws JobExecutionException {
         MasPlatformConnectionAliveService service = ApplicationContextUtil.getBean(MasPlatformConnectionAliveService.class);
-        boolean connectionAlive = service.checkOrKeepConnectionAlive();
-        if (connectionAlive) {
-            logger.info("Kept connection to MAS platform alive. Good news.");
-
-        } else {
-            logger.error("Connection to MAS platform dead. Set a new JSESSIONID ASAP.");
-
-        }
+        service.checkOrKeepConnectionAlive();
+        logger.info("Status:\n{}", service.getJsessionidStatus());
     }
 
     public static JobDetail getJobDetail() {

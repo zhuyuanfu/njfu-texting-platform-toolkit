@@ -35,7 +35,7 @@ public class MasPlatformScheduledMessageBoxDaoImpl implements MasPlatformSchedul
 			pageSizeAndOffset.put("offset", "0");
 			Map<String, String> listHeader = new HashMap<>();
 			listHeader.put("Content-Type", "application/x-www-form-urlencoded");
-	        listHeader.put("Cookie", "JSESSIONID=" + masConfig.getJSESSIONID());
+	        listHeader.put("Cookie", "JSESSIONID=" + masConfig.getJSESSIONID("admin"));
 			
 			String messageBoxPage = HttpUtil.requestWithMapFormData("GET", listUrl, listHeader, pageSizeAndOffset);
 			//logger.info("{}", messageBoxPage);
@@ -61,7 +61,7 @@ public class MasPlatformScheduledMessageBoxDaoImpl implements MasPlatformSchedul
 			String deleteUrl = "http://121.248.150.95:6789/sms/listSmsMt.do?act=deleteWaitMt";
 			Map<String, String> deleteHeader = new HashMap<>();
 			deleteHeader.put("Content-Type", "application/x-www-form-urlencoded");
-			deleteHeader.put("Cookie", "JSESSIONID=" + masConfig.getJSESSIONID());
+			deleteHeader.put("Cookie", "JSESSIONID=" + masConfig.getJSESSIONID("admin"));
 			
 			StringBuilder deleteFormDataBuilder = new StringBuilder("id=&display=&fromdate=&todate=&content=&subject=");
 			for(int i = 0; i < messageIdList.size(); i++) {

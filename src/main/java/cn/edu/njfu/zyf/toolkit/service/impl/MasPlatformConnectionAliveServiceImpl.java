@@ -17,31 +17,33 @@ public class MasPlatformConnectionAliveServiceImpl implements MasPlatformConnect
     
     @Autowired
     private MasPlatformConnectionAliveCheckingConfig config;
-    
-    @Override
-    public String getJSESSIONID() {
-        config.readJSESSIONIDFromDisk();
-        return config.getJSESSIONID();
-    }
 
     @Override
-    public String setJSESSIONID(String newJSESSIONID) {
-        return config.writeJSESSIONIDToDisk(newJSESSIONID);
+    public void checkOrKeepConnectionAlive() {
+        config.checkAllJSESSIONIDsAlive();
     }
 
-    @Override
-    public boolean isConnectionAlive() {
-        return config.checkConnectionAlive();
-    }
+	@Override
+	public String getJSESSIONID(String userName) {
+		 config.readJSESSIONIDFromDisk();
+	     return config.getJSESSIONID(userName);
+	}
 
-    @Override
-    public String getLastConnectionAliveTime() {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return config.getLastConnectionAliveTime().format(dtf);
-    }
+	@Override
+	public String setJSESSIONID(String userName, String jsessionid) {
+		config.setJSESSIONID(userName, jsessionid);
+		config.writeJSESSIONIDsToDisk();
+		return "Done, check 4 urself.";
+	}
 
-    @Override
-    public boolean checkOrKeepConnectionAlive() {
-        return config.checkConnectionAlive();
-    }
+	@Override
+	public String getJsessionidStatus() {
+		return config.getConnectionStatuses();
+	}
+
+	@Override
+	public String getLastConnectionAliveTime(String userName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

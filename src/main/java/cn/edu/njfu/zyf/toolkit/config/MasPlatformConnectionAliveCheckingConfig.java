@@ -11,7 +11,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,8 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import cn.edu.njfu.zyf.toolkit.model.MasPlatformUserJSESSIONID;
+import cn.edu.njfu.zyf.toolkit.utils.CommonUtil;
 import cn.edu.njfu.zyf.toolkit.utils.HttpUtil;
 
 @Component
@@ -29,60 +33,59 @@ public class MasPlatformConnectionAliveCheckingConfig  {
     
     @Value("${masplatform.JSESSIONIDDiskStoragePath}")
     private String jSessionIdDiskStoragePath;
-    
-    private String JSESSIONID;
-    
-    private boolean isConnectionAlive;
-    
-    private LocalDateTime lastConnectionAliveTime = LocalDateTime.of(1970, 1, 1, 0, 0);
-    
-    public String getJSESSIONID() {
-        return this.JSESSIONID;
+        
+    // 虽然key里存了用户名，value里又存一份用户名不太好，但是我懒啊
+    private Map<String, MasPlatformUserJSESSIONID> jsessionIdMap = new HashMap<>();
+
+    public String getJSESSIONID(String userName) {
+        return jsessionIdMap.get(userName).getJSESSIONID();
     }
     
-    public boolean getConnectionAlive() {
-        return this.isConnectionAlive;
-    }
-    
-    public LocalDateTime getLastConnectionAliveTime() {
-        return this.lastConnectionAliveTime;
+
+    public String getConnectionStatuses() {
+    	return CommonUtil.mapToPrettyString(jsessionIdMap);
     }
 
-    public boolean isConnectionAlive() {
-        return isConnectionAlive;
+    public void setConnectionAlive(String userName, boolean isConnectionAlive) {
+        this.jsessionIdMap.get(userName).setAlive(isConnectionAlive);
     }
 
-    public void setConnectionAlive(boolean isConnectionAlive) {
-        this.isConnectionAlive = isConnectionAlive;
-    }
 
-    public void setJSESSIONID(String jSESSIONID) {
-        JSESSIONID = jSESSIONID;
-    }
-
-    public void setLastConnectionAliveTime(LocalDateTime lastConnectionAliveTime) {
-        this.lastConnectionAliveTime = lastConnectionAliveTime;
+    public void setJSESSIONID(String userName, String jSESSIONID) {
+    	if (this.jsessionIdMap.containsKey(userName)) {
+    		this.jsessionIdMap.get(userName).setJSESSIONID(jSESSIONID);
+    	} else {
+    		MasPlatformUserJSESSIONID j = new MasPlatformUserJSESSIONID(userName, jSESSIONID);
+    		this.jsessionIdMap.put(userName, j);
+    	}
+    	writeJSESSIONIDsToDisk();
     }
     
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
         this.readJSESSIONIDFromDisk();
-        this.checkConnectionAlive();
+        this.checkAllJSESSIONIDsAlive();
         logger.info("** MasPlatformConnectionAliveCheckingConfig has been initiated. **");
     }
-    
-    public String writeJSESSIONIDToDisk(String newJSESSIONID) {
+        
+    public String writeJSESSIONIDsToDisk() {
         File file = new File(this.jSessionIdDiskStoragePath);
-        OutputStream os =null;
+        OutputStream os = null;
         OutputStreamWriter osr = null;
         try {
             os = new FileOutputStream(file);
             osr = new OutputStreamWriter(os);
-            osr.write("admin=" + newJSESSIONID);
-            this.JSESSIONID = newJSESSIONID;
+            StringBuilder sb = new StringBuilder();
+            Iterator<Entry<String, MasPlatformUserJSESSIONID>> itr = jsessionIdMap.entrySet().iterator();
+            while(itr.hasNext()) {
+            	Entry<String, MasPlatformUserJSESSIONID> entry = itr.next();
+            	String userName = entry.getKey();
+            	MasPlatformUserJSESSIONID jsessionid = entry.getValue();
+                sb.append(userName).append('=').append(jsessionid.getJSESSIONID()).append('\n');
+            }
+            osr.write(sb.toString());
         } catch (IOException e) {
-            logger.error("write jsession error, {}", e);
-            return "writing jsessionid to disk failed. go see log file for urself.";
+            logger.error("write jsessionid error, {}", e);
         } finally {
             if(osr != null) {
                 try {
@@ -102,7 +105,7 @@ public class MasPlatformConnectionAliveCheckingConfig  {
                 }
             }
         }
-        return "writing jsessionid to disk succeeded.";
+        return "Writing jsessionids to disk finished.";
     }
     
     public void readJSESSIONIDFromDisk() {
@@ -116,8 +119,12 @@ public class MasPlatformConnectionAliveCheckingConfig  {
             isr = new InputStreamReader(is);
             br = new BufferedReader(isr);
             String line = br.readLine();
-            String jsessionid = line.split("=")[1];
-            this.JSESSIONID = jsessionid;
+            while (line != null) {
+            	String[] userAndJSESSIONIDArray = line.split("=");
+            	MasPlatformUserJSESSIONID jsessionid = new MasPlatformUserJSESSIONID(userAndJSESSIONIDArray[0], userAndJSESSIONIDArray[1]);
+            	this.jsessionIdMap.put(userAndJSESSIONIDArray[0], jsessionid);
+            	line = br.readLine();
+            }
         } catch(IOException e) {
             logger.error("read jsessionid file error, {}", e);
         } finally {
@@ -145,30 +152,31 @@ public class MasPlatformConnectionAliveCheckingConfig  {
         }
     }
     
-    public Boolean checkConnectionAlive() {
+    public void checkAllJSESSIONIDsAlive() {
         String url = "http://121.248.150.95:6789/sms/sendSms.do?act=getNoticeMap";
-        Map<String, String> header = new HashMap<>();
-        header.put("Cookie", "JSESSIONID=" + this.JSESSIONID);
-        header.put("connection", "keep-alive");
-        header.put("content-length", "0");
-        boolean alive = false;
-        try {
-            String response = HttpUtil.requestWithStringRequestBody("POST", url, header, "");
-            if(!response.contains("登录超时")) {
-                alive = true;
-                this.lastConnectionAliveTime = LocalDateTime.now();
-                logger.info("Checking if JSESSIONID is alive using {}. Response: {}", url, response.trim());
-
-            } else {
-                logger.warn("Checking if JSESSIONID is alive using {}. Response says:  \n登录超时\n", url);
-                logger.warn("Connection dead. Set a new JSESSIONID.");
+        Iterator<MasPlatformUserJSESSIONID> itr = this.jsessionIdMap.values().iterator();
+        while (itr.hasNext()) {
+        	MasPlatformUserJSESSIONID jsessionIdWrapper = itr.next(); 
+        	Map<String, String> header = new HashMap<>();
+            header.put("Cookie", "JSESSIONID=" + jsessionIdWrapper.getJSESSIONID());
+            header.put("connection", "keep-alive");
+            header.put("content-length", "0");
+            boolean alive = false;
+            try {
+                String response = HttpUtil.requestWithStringRequestBody("POST", url, header, "");
+                //logger.info(response);
+                if(response.contains("登录超时")) {
+                    logger.warn("Checking if {} is alive using {}. Response says:  \n登录超时\n",jsessionIdWrapper.getUserName(), url);
+                    logger.warn("{} is dead. Set a new JSESSIONID for him.", jsessionIdWrapper.getUserName());
+                } else {
+                	alive = true;
+                    logger.info("Checking if {} is alive using {}. Response: {}", jsessionIdWrapper.getUserName(), url, response.trim());
+                    jsessionIdWrapper.setLastConnectionAliveTime(LocalDateTime.now());
+                }
+            } catch (IOException e) {
+                logger.error("Exception. Skipping {}. Error: {}", jsessionIdWrapper.getUserName(), e);
             }
-        } catch (IOException e) {
-            logger.error("Connection dead. Set a new JSESSIONID. {}", e);
+            jsessionIdWrapper.setAlive(alive);
         }
-        this.isConnectionAlive = alive;
-        return alive;
     }
-
-
 }

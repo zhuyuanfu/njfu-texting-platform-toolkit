@@ -40,7 +40,7 @@ public class TextMessageServiceImpl implements TextMessageService {
     @Override
     public String resolveFileAndSendHttpRequest(String jSessionId, MultipartFile excelFile) {
         if(jSessionId == null || jSessionId.equals("")) {
-            jSessionId = masConfig.getJSESSIONID();
+            jSessionId = masConfig.getJSESSIONID("admin");
         }
         
         List<TextMessageDelivery> deliveryList = new ArrayList<>();
@@ -151,7 +151,7 @@ public class TextMessageServiceImpl implements TextMessageService {
 
 	@Override
 	public boolean sendTextMessage(TextMessageDelivery delivery) {
-		return sendMessage(masConfig.getJSESSIONID(), 
+		return sendMessage(masConfig.getJSESSIONID("admin"), 
 				delivery.getSendMode(),
 				delivery.getMobile(),
 				delivery.getName(),
@@ -163,7 +163,7 @@ public class TextMessageServiceImpl implements TextMessageService {
 	@Override
 	public boolean sendImmediately(String mobile, String content) {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		return sendMessage(masConfig.getJSESSIONID(), 
+		return sendMessage(masConfig.getJSESSIONID("admin"), 
 				0,
 				mobile,
 				"一条立即发送的短信",
